@@ -1,5 +1,14 @@
 package org.eece261.contactswap;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -17,13 +26,16 @@ public class ContactSwap extends Activity {
     Button btnSendSMS;
     EditText txtPhoneNo;
     EditText txtMessage;
+    ArrayList<String> alFriends;
  
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) 
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);        
+        setContentView(R.layout.main);
+        
+        loadFriendsList();
  
         btnSendSMS = (Button) findViewById(R.id.btnSendSMS);
         txtPhoneNo = (EditText) findViewById(R.id.txtPhoneNo);
@@ -44,7 +56,80 @@ public class ContactSwap extends Activity {
             }
         });  
         
-    }  
+    }
+    
+    private void loadFriendsList() {
+    	FileInputStream fin;
+    	DataInputStream din;
+    	
+    	alFriends = new ArrayList<String>();
+    	
+    	try {
+			fin = new FileInputStream("friendsList");
+			din = new DataInputStream(fin);
+			
+			while(din.available() > 0) {
+				alFriends.add(din.readUTF());
+			}
+			
+			fin.close();
+		} catch (FileNotFoundException e) {
+			// Assume it hasn't been created yet
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    private void addFriend(String friend) {
+    	alFriends.add(friend);
+    	
+    	FileOutputStream fout;
+    	DataOutputStream dout;
+    	
+    	try {
+			fout = new FileOutputStream("friendList", false);
+			dout = new DataOutputStream(fout);
+			
+			for(int i = 0; i < alFriends.size(); i++) {
+				dout.writeUTF(alFriends.get(i));
+			}
+			
+			fout.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    private void removeFriend(String friend) {
+    	Iterator<String> sit = alFriends.iterator();
+    	
+    	while(sit.hasNext()) {
+    		String current = sit.next();
+    		if(current.equalsIgnoreCase(friend)) {
+    			alFriends.remove(current);
+    		}
+    	}
+    	
+    	FileOutputStream fout;
+    	DataOutputStream dout;
+    	
+    	try {
+			fout = new FileOutputStream("friendList", false);
+			dout = new DataOutputStream(fout);
+			
+			for(int i = 0; i < alFriends.size(); i++) {
+				dout.writeUTF(alFriends.get(i));
+			}
+			
+			fout.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
     
     //---sends an SMS message to another device---
     private void sendSMS(String phoneNumber, String message)
