@@ -26,7 +26,11 @@ public class SmsReceiver extends BroadcastReceiver
                 str += "SMS from " + msgs[i].getOriginatingAddress();                     
                 str += " :";
                 str += msgs[i].getMessageBody().toString();
-                str += "\n";        
+                str += "\n";  
+                
+                if(msgs[i].getMessageBody().toString().contains("ContactSwap:")) {
+                	//Do something with it
+                }
             }
             //---display the new SMS message---
             Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
