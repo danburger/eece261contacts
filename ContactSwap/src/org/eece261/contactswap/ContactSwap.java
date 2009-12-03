@@ -18,24 +18,101 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 public class ContactSwap extends Activity {
     Button btnSendSMS;
+    Button btnSMSDebug;
+    Button btnFriends;
+    Button btnQuit;
+    Button btnAdd;
+    Button btnReturn;
+    
     EditText txtPhoneNo;
     EditText txtMessage;
+    EditText etName;
+    
+    ListView lvFriends;
     ArrayList<String> alFriends;
  
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) 
     {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+    	super.onCreate(savedInstanceState);
+    	loadFriendsList();
+    	startMainMenu();
+    }
+    
+    private void startMainMenu() {
+        setContentView(R.layout.menu);
         
-        loadFriendsList();
+        btnSMSDebug = (Button) findViewById(R.id.btnSMSDebug);
+        btnFriends = (Button) findViewById(R.id.btnFriends);
+        btnQuit = (Button) findViewById(R.id.btnQuit);
+ 
+        btnSMSDebug.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                startSMSDebug();
+            }
+        });
+        
+        btnFriends.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                startFriendManagement();
+            }
+        });
+        
+        btnQuit.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                finish();
+            }
+        });    	
+    }
+    
+    private void startFriendManagement() {
+    	setContentView(R.layout.managefriends);
+    	
+    	btnReturn = (Button) findViewById(R.id.btnReturn);
+    	btnAdd = (Button) findViewById(R.id.btnAdd);
+    	lvFriends = (ListView) findViewById(R.id.lvFriends);
+    	etName = (EditText) findViewById(R.id.etName);
+    	
+    	final ArrayAdapter<String> aaFriends = new ArrayAdapter<String>(this, 
+        		android.R.layout.simple_list_item_1, alFriends);
+        
+    	lvFriends.setAdapter(aaFriends);
+    	
+    	btnReturn.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                startMainMenu();
+            }
+        });
+    	
+    	btnAdd.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                addFriend(etName.getText().toString());
+                aaFriends.notifyDataSetChanged();
+            }
+        });
+    }
+    
+    private void startSMSDebug() {
+        setContentView(R.layout.smsdebug);
  
         btnSendSMS = (Button) findViewById(R.id.btnSendSMS);
         txtPhoneNo = (EditText) findViewById(R.id.txtPhoneNo);
@@ -54,8 +131,7 @@ public class ContactSwap extends Activity {
                         "Please enter both phone number and message.", 
                         Toast.LENGTH_SHORT).show();
             }
-        });  
-        
+        });
     }
     
     private void loadFriendsList() {
@@ -65,7 +141,7 @@ public class ContactSwap extends Activity {
     	alFriends = new ArrayList<String>();
     	
     	try {
-			fin = new FileInputStream("friendsList");
+			fin = openFileInput("friendsList");
 			din = new DataInputStream(fin);
 			
 			while(din.available() > 0) {
@@ -87,7 +163,7 @@ public class ContactSwap extends Activity {
     	DataOutputStream dout;
     	
     	try {
-			fout = new FileOutputStream("friendList", false);
+			fout = openFileOutput("friendsList", MODE_PRIVATE);
 			dout = new DataOutputStream(fout);
 			
 			for(int i = 0; i < alFriends.size(); i++) {
@@ -116,7 +192,7 @@ public class ContactSwap extends Activity {
     	DataOutputStream dout;
     	
     	try {
-			fout = new FileOutputStream("friendList", false);
+    		fout = openFileOutput("friendsList", MODE_PRIVATE);
 			dout = new DataOutputStream(fout);
 			
 			for(int i = 0; i < alFriends.size(); i++) {
