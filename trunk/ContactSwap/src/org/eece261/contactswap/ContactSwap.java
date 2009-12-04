@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -18,6 +17,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -109,6 +109,16 @@ public class ContactSwap extends Activity {
                 aaFriends.notifyDataSetChanged();
             }
         });
+    	
+    	lvFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				removeFriend(arg2);
+				aaFriends.notifyDataSetChanged();
+			}
+		});
     }
     
     private void startSMSDebug() {
@@ -178,15 +188,9 @@ public class ContactSwap extends Activity {
 		}
     }
     
-    private void removeFriend(String friend) {
-    	Iterator<String> sit = alFriends.iterator();
+    private void removeFriend(int index) {
     	
-    	while(sit.hasNext()) {
-    		String current = sit.next();
-    		if(current.equalsIgnoreCase(friend)) {
-    			alFriends.remove(current);
-    		}
-    	}
+    	alFriends.remove(index);
     	
     	FileOutputStream fout;
     	DataOutputStream dout;
