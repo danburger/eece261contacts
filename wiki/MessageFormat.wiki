@@ -1,0 +1,17 @@
+= PROPOSED MESSAGE FORMAT =
+ContactSwap:COMMAND:TAG:Data:TAG:Data...:
+
+COMMAND -> Query, Response
+
+TAG -> Name, Phone, NotFound
+
+= For example: =
+
+===The Search===
+ContactSwap:Query:Name:Rob McColl:
+
+===Results if Found===
+ContactSwap:Response:Name:Rob McColl:Phone:2054220909:
+
+===Results if Not Found===
+ContactSwap:Response:Name:Rob McColl:NotFound:
