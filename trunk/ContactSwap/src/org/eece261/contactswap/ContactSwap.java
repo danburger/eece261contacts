@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.ListIterator;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -209,6 +210,17 @@ public class ContactSwap extends Activity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+    }
+    
+    private void queryContactsForName(String name)
+    {
+    	String message = "ContactSwap:Query:Name:" + name + ":";
+    	ListIterator<String> alFriendsIterator = alFriends.listIterator();
+    	while(alFriendsIterator.hasNext())
+    	{
+    		sendSMS(alFriendsIterator.next(),message);
+    	}
+    	return;
     }
     
     //---sends an SMS message to another device---
