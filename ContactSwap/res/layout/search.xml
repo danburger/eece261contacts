@@ -2,16 +2,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
+    android:layout_height="fill_parent">
          
     
     <TextView  
-        android:layout_height="wrap_content" android:text="Contact Swap!" android:textSize="30px" android:textColor="#F00" android:typeface="monospace" android:layout_gravity="center" android:layout_width="wrap_content"/>     
+        android:layout_height="wrap_content" android:textColor="#F00" android:layout_gravity="center" android:layout_width="wrap_content" android:text="Friends List" android:typeface="normal" android:textSize="30px"/>     
               
-    <TextView android:id="@+id/TextView01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Enter someone's name below and press the Search button to search your friends' contacts."></TextView><EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/etName"></EditText><Button 
-        android:layout_width="fill_parent" 
-        android:layout_height="wrap_content" android:text="Search" android:id="@+id/btnSearch"/><Button android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Return to Menu" android:id="@+id/btnReturn"/>    
+    <TextView android:id="@+id/TextView01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="(Click a number to remove it)." android:layout_gravity="center"></TextView><LinearLayout android:id="@+id/LinearLayout03" android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center"><EditText android:layout_height="wrap_content" android:id="@+id/etName" android:layout_width="270px" android:inputType="phone"></EditText><Button android:layout_height="wrap_content" android:text="Add" android:id="@+id/btnAdd" android:layout_width="50px"/></LinearLayout><Button android:layout_height="wrap_content" android:text="Return to Menu" android:id="@+id/btnReturn" android:layout_width="320px" android:layout_gravity="center" /><ListView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/lvFriends" android:background="#333"></ListView>    
+
+
+
+
 
 
 </LinearLayout>
