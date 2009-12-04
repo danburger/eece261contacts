@@ -39,6 +39,8 @@ public class ContactSwap extends Activity {
     
     ListView lvFriends;
     ArrayList<String> alFriends;
+    ListView lvSearches;
+    ArrayList<search> alSearches;
  
     /** Called when the activity is first created. */
     @Override
@@ -46,6 +48,7 @@ public class ContactSwap extends Activity {
     {
     	super.onCreate(savedInstanceState);
     	loadFriendsList();
+    	loadSearchesList();
     	startMainMenu();
     }
     
@@ -79,6 +82,47 @@ public class ContactSwap extends Activity {
                 finish();
             }
         });    	
+    }
+    
+    private void startSearchManager() {
+    	setContentView(R.layout.search);
+    	
+    	btnReturn = (Button) findViewById(R.id.btnReturn);
+    	btnAdd = (Button) findViewById(R.id.btnSearch);
+    	lvSearches = (ListView) findViewById(R.id.lvSearches);
+    	etName = (EditText) findViewById(R.id.etName);
+    	
+    	final ArrayAdapter<String> aaFriends = new ArrayAdapter<String>(this, 
+        		android.R.layout.simple_list_item_1, alFriends);
+        
+    	lvFriends.setAdapter(aaFriends);
+    	
+    	btnReturn.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                startMainMenu();
+            }
+        });
+    	
+    	btnAdd.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                addFriend(etName.getText().toString());
+                aaFriends.notifyDataSetChanged();
+            }
+        });
+    	
+    	lvFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				removeFriend(arg2);
+				aaFriends.notifyDataSetChanged();
+			}
+		});
     }
     
     private void startFriendManagement() {
@@ -143,6 +187,97 @@ public class ContactSwap extends Activity {
                         Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    
+    private class search {
+    	String name = "";
+    	ArrayList<String> responses = new ArrayList<String>();
+    }
+    
+    private void loadSearchesList() {
+    	FileInputStream fin;
+    	DataInputStream din;
+    	
+    	alSearches = new ArrayList<search>();
+    	
+    	try {
+			fin = openFileInput("searchesList");
+			din = new DataInputStream(fin);
+			
+			while(din.available() > 0) {
+				search temp = new search();
+				temp.name = din.readUTF();
+				String current = din.readUTF();
+				while(!current.equalsIgnoreCase("")) {
+					temp.responses.add(current);
+					current = din.readUTF();
+				}
+			}
+			
+			din.close();
+			fin.close();
+		} catch (FileNotFoundException e) {
+			// Assume it hasn't been created yet
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    private void addSearch(String name) {
+    	search temp = new search();
+    	temp.name = name;
+    	alSearches.add(temp);
+    	
+    	FileOutputStream fout;
+    	DataOutputStream dout;
+    	
+    	try {
+			fout = openFileOutput("searchesList", MODE_PRIVATE);
+			dout = new DataOutputStream(fout);
+			
+			for(int i = 0; i < alSearches.size(); i++) {
+				dout.writeUTF(alSearches.get(i).name);
+				for(int j = 0; j < alSearches.get(i).responses.size(); j++) {
+					dout.writeUTF(alSearches.get(i).responses.get(j));
+				}
+				dout.writeUTF("");
+			}
+			
+			dout.close();
+			fout.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    private void removeSearch(int index) {
+    	
+    	alSearches.remove(index);
+    	
+    	FileOutputStream fout;
+    	DataOutputStream dout;
+    	
+    	try {
+    		fout = openFileOutput("searchesList", MODE_PRIVATE);
+			dout = new DataOutputStream(fout);
+			
+			for(int i = 0; i < alSearches.size(); i++) {
+				dout.writeUTF(alSearches.get(i).name);
+				for(int j = 0; j < alSearches.get(i).responses.size(); j++) {
+					dout.writeUTF(alSearches.get(i).responses.get(j));
+				}
+				dout.writeUTF("");
+			}
+			
+			dout.close();
+			fout.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
     
     private void loadFriendsList() {
