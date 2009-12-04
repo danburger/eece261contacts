@@ -1,0 +1,18 @@
+= SHORT TERM GOALS =
+(Goals that MUST be satisfied to complete project)
+  * Ability to add a contact (Dan)
+  * Ability to search local contact database for a number to match a name (Dan)
+  * Sending search query through text and parsing (Brennan)
+  * Recieving search result through text and parsing (Brennan)
+  * Receiving search request through text and parsing (Brennan)
+  * Sending search result through text and parsing (Brennan)
+  * Remove incoming text from inbox (Rob)
+  * GUI Interface for new searches (Rob)
+  * GUI Interface for old searches (possibly the same) (Rob)
+	
+	
+= LONG TERM GOALS =
+(Goals that would be cool to do before it's over)
+  * Initiate sending of multiple contact
+  * Receive multiple contact
+  * Add multiple contact
