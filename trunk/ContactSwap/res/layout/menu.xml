@@ -10,5 +10,5 @@
               
     <Button 
         android:layout_width="fill_parent" 
-        android:layout_height="wrap_content" android:text="Search" android:id="@+id/btnSearch"/><Button android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/btnSend" android:text="Send Contacts"/><Button android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/btnReceive" android:text="Receive Contacts"/><Button android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/btnFriends" android:text="Manage Friends"/><Button android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/btnSMSDebug" android:text="SMS Debug"/><Button android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/btnQuit" android:text="Quit"/>    
+        android:layout_height="wrap_content" android:text="Search" android:id="@+id/btnSearch"/><Button android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/btnFriends" android:text="Manage Friends"/><Button android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/btnSMSDebug" android:text="SMS Debug"/><Button android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/btnQuit" android:text="Quit"/>    
 </LinearLayout>
