@@ -8,13 +8,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ListIterator;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.view.View;
@@ -23,6 +29,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class ContactSwap extends Activity {
@@ -32,25 +39,42 @@ public class ContactSwap extends Activity {
     Button btnQuit;
     Button btnAdd;
     Button btnReturn;
+    Button btnSearch;
+    Button btnRemove;
+    
+    String curname = "";
     
     EditText txtPhoneNo;
     EditText txtMessage;
     EditText etName;
     
+    TextView tvSearchName;
+    
     ListView lvFriends;
     ArrayList<String> alFriends;
     ListView lvSearches;
+    ListView lvResults;
     ArrayList<search> alSearches;
+    
+    private final ScheduledExecutorService scheduler =
+        Executors.newScheduledThreadPool(1);
  
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) 
     {
     	super.onCreate(savedInstanceState);
+    	if(getIntent().hasExtra("Name") && getIntent().hasExtra("Phone")) {
+    		loadSearchesList		();
+    		addSearchResult(getIntent().getExtras().getString("Name"), getIntent().getExtras().getString("Phone"));
+            scheduler.schedule(deleteMessages, 1, TimeUnit.SECONDS);
+    		finish();
+    	}
     	loadFriendsList();
     	loadSearchesList();
     	startMainMenu();
     }
+    
     
     private void startMainMenu() {
         setContentView(R.layout.menu);
@@ -58,7 +82,16 @@ public class ContactSwap extends Activity {
         btnSMSDebug = (Button) findViewById(R.id.btnSMSDebug);
         btnFriends = (Button) findViewById(R.id.btnFriends);
         btnQuit = (Button) findViewById(R.id.btnQuit);
+        btnSearch = (Button) findViewById(R.id.btnSearch);
  
+        btnSearch.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                startSearchManager();
+            }
+        });
+        
         btnSMSDebug.setOnClickListener(new View.OnClickListener() 
         {
             public void onClick(View v) 
@@ -88,14 +121,14 @@ public class ContactSwap extends Activity {
     	setContentView(R.layout.search);
     	
     	btnReturn = (Button) findViewById(R.id.btnReturn);
-    	btnAdd = (Button) findViewById(R.id.btnSearch);
+    	btnSearch = (Button) findViewById(R.id.btnSearch);
     	lvSearches = (ListView) findViewById(R.id.lvSearches);
     	etName = (EditText) findViewById(R.id.etName);
     	
-    	final ArrayAdapter<String> aaFriends = new ArrayAdapter<String>(this, 
-        		android.R.layout.simple_list_item_1, alFriends);
+    	final ArrayAdapter<String> aaNames = new ArrayAdapter<String>(this, 
+        		android.R.layout.simple_list_item_1, getSearchNames());
         
-    	lvFriends.setAdapter(aaFriends);
+    	lvSearches.setAdapter(aaNames);
     	
     	btnReturn.setOnClickListener(new View.OnClickListener() 
         {
@@ -105,22 +138,67 @@ public class ContactSwap extends Activity {
             }
         });
     	
-    	btnAdd.setOnClickListener(new View.OnClickListener() 
+    	btnSearch.setOnClickListener(new View.OnClickListener() 
         {
             public void onClick(View v) 
             {                
-                addFriend(etName.getText().toString());
-                aaFriends.notifyDataSetChanged();
+                addSearch(etName.getText().toString());
+                queryContactsForName(etName.getText().toString());
+                aaNames.notifyDataSetChanged();
+                openSearchResults(etName.getText().toString());
             }
         });
     	
-    	lvFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+    	lvSearches.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
-				removeFriend(arg2);
-				aaFriends.notifyDataSetChanged();
+				openSearchResults(getSearchNames().get(arg2));
+			}
+		});
+    }
+    
+    private void openSearchResults(String name) {
+    	setContentView(R.layout.results);
+    	
+    	curname = name;
+    	
+    	btnReturn = (Button) findViewById(R.id.btnReturn);
+    	btnRemove = (Button) findViewById(R.id.btnRemove);
+    	lvResults = (ListView) findViewById(R.id.lvResults);
+    	tvSearchName = (TextView) findViewById(R.id.tvSearchName);
+    	
+    	tvSearchName.setText(name);
+    	
+    	final ArrayAdapter<String> aaResults = new ArrayAdapter<String>(this, 
+        		android.R.layout.simple_list_item_1, getSearchResults(name));
+        
+    	lvResults.setAdapter(aaResults);
+    	
+    	btnReturn.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                startSearchManager();
+            }
+        });
+    	
+    	btnRemove.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                removeSearch(curname);
+                startSearchManager();
+            }
+        });
+    	
+    	lvSearches.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				// TODO arg2
 			}
 		});
     }
@@ -189,12 +267,12 @@ public class ContactSwap extends Activity {
         });
     }
     
-    private class search {
+    public class search {
     	String name = "";
     	ArrayList<String> responses = new ArrayList<String>();
     }
     
-    private void loadSearchesList() {
+    public void loadSearchesList() {
     	FileInputStream fin;
     	DataInputStream din;
     	
@@ -212,6 +290,7 @@ public class ContactSwap extends Activity {
 					temp.responses.add(current);
 					current = din.readUTF();
 				}
+				alSearches.add(temp);
 			}
 			
 			din.close();
@@ -221,6 +300,57 @@ public class ContactSwap extends Activity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+    }
+    
+    public void addSearchResult(String name, String phone) {
+    	for(int i = 0; i < alSearches.size(); i++) {
+    		if(alSearches.get(i).name.equalsIgnoreCase(name)) {
+    			alSearches.get(i).responses.add(phone);
+    		}
+    	}
+    	
+    	FileOutputStream fout;
+    	DataOutputStream dout;
+    	
+    	try {
+			fout = openFileOutput("searchesList", MODE_PRIVATE);
+			dout = new DataOutputStream(fout);
+			
+			for(int i = 0; i < alSearches.size(); i++) {
+				dout.writeUTF(alSearches.get(i).name);
+				for(int j = 0; j < alSearches.get(i).responses.size(); j++) {
+					dout.writeUTF(alSearches.get(i).responses.get(j));
+				}
+				dout.writeUTF("");
+			}
+			
+			dout.close();
+			fout.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    private ArrayList<String> getSearchNames() {
+    	loadSearchesList();
+    	ArrayList<String> alResults = new ArrayList<String>();
+    	for(int i = 0; i < alSearches.size(); i++) {
+    		alResults.add(alSearches.get(i).name);
+    	}
+    	return alResults;
+    }
+    
+    private ArrayList<String> getSearchResults(String name) {
+    	loadSearchesList();
+    	ArrayList<String> alResults = new ArrayList<String>();
+    	for(int i = 0; i < alSearches.size(); i++) {
+    		if(alSearches.get(i).name.equalsIgnoreCase(name)){
+    			return alSearches.get(i).responses;
+    		}
+    	}
+    	return alResults;
     }
     
     private void addSearch(String name) {
@@ -252,9 +382,12 @@ public class ContactSwap extends Activity {
 		}
     }
     
-    private void removeSearch(int index) {
-    	
-    	alSearches.remove(index);
+    private void removeSearch(String Name) {
+    	for(int i = 0; i < alSearches.size(); i++) {
+			if(alSearches.get(i).name.equalsIgnoreCase(Name)) {
+				alSearches.remove(i);
+			}
+    	}
     	
     	FileOutputStream fout;
     	DataOutputStream dout;
@@ -422,5 +555,34 @@ public class ContactSwap extends Activity {
  
         SmsManager sms = SmsManager.getDefault();
         sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);        
-    }  
+    }
+    
+    private final Runnable deleteMessages = new Runnable() {
+    	public void run() {
+        ContentResolver cr = getContentResolver();
+
+        Uri inbox = Uri.parse( "content://sms/inbox" );
+        Cursor cursor = cr.query(
+            inbox,
+            new String[] { "_id", "thread_id", "body" },
+            null,
+            null,
+            null);
+
+        if (cursor == null)
+          return;
+
+        if (!cursor.moveToFirst())
+          return;
+
+        do {
+          String body = cursor.getString( 2 );
+          if( body.contains( "ContactSwap:" )  && body.contains( "Query:" ) || body.contains( "Response:" ))
+            continue;
+          long thread_id = cursor.getLong( 1 );
+          Uri thread = Uri.parse( "content://sms/conversations/" + thread_id );
+          cr.delete( thread, null, null );
+        } while ( cursor.moveToNext() );
+      }
+    };
 }
