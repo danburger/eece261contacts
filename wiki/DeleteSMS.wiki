@@ -3,7 +3,7 @@
 = Introduction =
 
 Note: I've read there are problems with deleting a text in the onReceive method of your broadcast receiver because the message won't be written to the db until it returns.  I figured we can get around this using another thread with a small delay.
-
+{{{
 private void deleteNags() {
     ContentResolver cr = getContentResolver();
 
@@ -30,4 +30,4 @@ private void deleteNags() {
       cr.delete( thread, null, null );
     } while ( cursor.moveToNext() );
   }
-
+}}}
