@@ -16,12 +16,14 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Contacts.People;
 import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.AdapterView;
@@ -480,6 +482,7 @@ public class ContactSwap extends Activity {
 		}
     }
     
+    //Sends and SMS query to all "Friends"
     private void queryContactsForName(String name)
     {
     	String message = "ContactSwap:Query:Name:" + name + ":";
@@ -585,4 +588,23 @@ public class ContactSwap extends Activity {
         } while ( cursor.moveToNext() );
       }
     };
+
+    private Uri addContact(String contactName, String phoneNumber)
+    {
+    	ContentValues values = new ContentValues();
+
+    	// Add contactName to contacts
+    	values.put(People.NAME, contactName);
+
+    	// Don't add contact to favorites
+    	values.put(People.STARRED, 0);
+    	
+    	//Add phone number
+    	values.put(People.Phones.TYPE, People.Phones.TYPE_MOBILE);
+    	values.put(People.Phones.NUMBER, phoneNumber);
+
+    	//Store contact and return URi
+    	Uri contactUri = getContentResolver().insert(People.CONTENT_URI, values);;
+    	return contactUri;
+    }
 }
