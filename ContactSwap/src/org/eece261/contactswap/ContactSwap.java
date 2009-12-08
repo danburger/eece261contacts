@@ -607,8 +607,6 @@ public class ContactSwap extends Activity {
     	if (newPersonUri != null) 
     	{
 			
-			phoneNumber = numberConvert(phoneNumber);
-			
 			ContentValues mobileValues = new ContentValues();
 			Uri mobileUri = Uri.withAppendedPath(newPersonUri, Contacts.People.Phones.CONTENT_DIRECTORY);
 			mobileValues.put(Contacts.Phones.NUMBER, phoneNumber);
@@ -629,21 +627,4 @@ public class ContactSwap extends Activity {
     	
     	return newPersonUri;
     }
- 
-    // Converts 
-	private String numberConvert(String phoneNumber) {
-		if (phoneNumber.length() == 7) {
-			phoneNumber = phoneNumber.substring(0, 3) + "-" + phoneNumber.substring(3, 7);
-		}
-		// Special case 2: (123) 456-7890
-		else if (phoneNumber.length() == 10) {
-			phoneNumber = "(" + phoneNumber.substring(0, 3) + ") "
-					+ phoneNumber.substring(3, 6) + "-" + phoneNumber.substring(6,10);
-		}
-		else
-		{
-			phoneNumber = "555-5555";
-		}
-		return phoneNumber;
-	}
 }
