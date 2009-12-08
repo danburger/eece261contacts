@@ -6,6 +6,8 @@ COMMAND -> Query, Response
 
 TAG -> Name, Phone, NotFound
 
+Replace " " with "^"
+
 = For example: =
 
 ===The Search===
