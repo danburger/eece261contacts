@@ -23,8 +23,9 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Contacts.People;
+import android.provider.Contacts;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -33,6 +34,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 public class ContactSwap extends Activity {
     Button btnSendSMS;
@@ -75,6 +77,7 @@ public class ContactSwap extends Activity {
     	loadFriendsList();
     	loadSearchesList();
     	startMainMenu();
+    	
     }
     
     
@@ -195,12 +198,12 @@ public class ContactSwap extends Activity {
             }
         });
     	
-    	lvSearches.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {
-				// TODO arg2
+    	lvResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			//System.err.println("Could not listen on port: 8080.");
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,long arg3) {
+				
+				Log.i("CA", "Made it here");
+				addContact(curname, getSearchResults(curname).get(arg2));
 			}
 		});
     }
@@ -593,18 +596,52 @@ public class ContactSwap extends Activity {
     {
     	ContentValues values = new ContentValues();
 
-    	// Add contactName to contacts
-    	values.put(People.NAME, contactName);
+    	values.put(Contacts.People.NAME, contactName);
+    	// 1 = contact is a favorite; 0 = contact is not a favorite
+    	values.put(Contacts.People.STARRED, 0);
 
-    	// Don't add contact to favorites
-    	values.put(People.STARRED, 0);
+    	Uri newPersonUri = Contacts.People.createPersonInMyContactsGroup(getContentResolver(), values);
+
+    	if (newPersonUri != null) 
+    	{
+			
+			phoneNumber = numberConvert(phoneNumber);
+			
+			ContentValues mobileValues = new ContentValues();
+			Uri mobileUri = Uri.withAppendedPath(newPersonUri, Contacts.People.Phones.CONTENT_DIRECTORY);
+			mobileValues.put(Contacts.Phones.NUMBER, phoneNumber);
+			mobileValues.put(Contacts.Phones.TYPE, Contacts.Phones.TYPE_MOBILE);
+			Uri phoneUpdate = getContentResolver().insert(mobileUri,
+					mobileValues);
+			if (phoneUpdate == null) 
+			{
+				Log.i("CA","Failed to add new number");
+			}
+    	}
+
+        String addedString = "New contact added with name: " + contactName + " and number: " +phoneNumber;
+       	
+        Log.i("CA",addedString); 
     	
-    	//Add phone number
-    	values.put(People.Phones.TYPE, People.Phones.TYPE_MOBILE);
-    	values.put(People.Phones.NUMBER, phoneNumber);
-
-    	//Store contact and return URi
-    	Uri contactUri = getContentResolver().insert(People.CONTENT_URI, values);;
-    	return contactUri;
+        Toast.makeText(super.getApplicationContext(), addedString, Toast.LENGTH_LONG);
+    	
+    	return newPersonUri;
     }
+ 
+    
+	private String numberConvert(String phoneNumber) {
+		if (phoneNumber.length() == 7) {
+			phoneNumber = phoneNumber.substring(0, 3) + "-" + phoneNumber.substring(3, 7);
+		}
+		// Special case 2: (123) 456-7890
+		else if (phoneNumber.length() == 10) {
+			phoneNumber = "(" + phoneNumber.substring(0, 3) + ") "
+					+ phoneNumber.substring(3, 6) + "-" + phoneNumber.substring(6,10);
+		}
+		else
+		{
+			phoneNumber = "555-5555";
+		}
+		return phoneNumber;
+	}
 }
