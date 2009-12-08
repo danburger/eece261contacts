@@ -488,6 +488,8 @@ public class ContactSwap extends Activity {
     //Sends and SMS query to all "Friends"
     private void queryContactsForName(String name)
     {
+    	name.replace(' ', '^');
+    	
     	String message = "ContactSwap:Query:Name:" + name + ":";
     	ListIterator<String> alFriendsIterator = alFriends.listIterator();
     	while(alFriendsIterator.hasNext())
@@ -628,7 +630,7 @@ public class ContactSwap extends Activity {
     	return newPersonUri;
     }
  
-    
+    // Converts 
 	private String numberConvert(String phoneNumber) {
 		if (phoneNumber.length() == 7) {
 			phoneNumber = phoneNumber.substring(0, 3) + "-" + phoneNumber.substring(3, 7);
