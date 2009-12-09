@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.provider.Contacts.People;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
-import android.widget.Toast; 
 
 public class SmsReceiver extends BroadcastReceiver
 {		
@@ -72,10 +71,8 @@ public class SmsReceiver extends BroadcastReceiver
 				        int phoneColumn = cur.getColumnIndex(People.NUMBER);
 				    
 				        do {
-				        	Toast.makeText(context, cur.getString(nameColumn), Toast.LENGTH_LONG).show();
 				            if(cur.getString(nameColumn).equalsIgnoreCase(Name)) {
 				            	Phone = cur.getString(phoneColumn);
-				            	Toast.makeText(context, Phone, Toast.LENGTH_LONG).show();
 				            }
 				        } while (cur.moveToNext());
 				    }
@@ -91,11 +88,20 @@ public class SmsReceiver extends BroadcastReceiver
                 	
                 }
             }
-            //---display the new SMS message---
-            if(!str.equalsIgnoreCase("")) {
-            	Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
-            }
-        }                         
+        }
+        /*	for (SmsMessage currentMessage : msgs) {
+		currentMessage.getDisplayMessageBody();
+		Uri deleteUri = Uri.parse("content://sms");
+		currentMessage.getTimestampMillis();
+		context.getContentResolver().delete(
+				deleteUri,
+				"address=? and date=?",
+				new String[] {
+						currentMessage.getOriginatingAddress(),
+						String.valueOf(currentMessage
+								.getTimestampMillis()) });
+	}*/
+
     }
     
     private void sendSMS(String phoneNumber, String message)

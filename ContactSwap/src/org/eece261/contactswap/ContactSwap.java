@@ -13,14 +13,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Contacts;
@@ -76,8 +76,7 @@ public class ContactSwap extends Activity {
     	}
     	loadFriendsList();
     	loadSearchesList();
-    	startMainMenu();
-    	
+    	startMainMenu();    	
     }
     
     
@@ -199,11 +198,23 @@ public class ContactSwap extends Activity {
         });
     	
     	lvResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			//System.err.println("Could not listen on port: 8080.");
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,long arg3) {
+
+				final String ThisWillOnlyBeUsedHERE = getSearchResults(curname).get(arg2);
 				
-				Log.i("CA", "Made it here");
-				addContact(curname, getSearchResults(curname).get(arg2));
+				new AlertDialog.Builder(ContactSwap.this).setTitle("Are you sure?")
+				.setMessage("Are you sure you want to add " + curname + " with number " + ThisWillOnlyBeUsedHERE + "?")
+				.setNeutralButton("No",
+				new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog,
+				int which) {
+				}
+				}).setPositiveButton("Yes", 
+						new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,
+					int which) {
+						addContact(curname, ThisWillOnlyBeUsedHERE);
+					}}).show();
 			}
 		});
     }
@@ -567,31 +578,10 @@ public class ContactSwap extends Activity {
     
     private final Runnable deleteMessages = new Runnable() {
     	public void run() {
-        ContentResolver cr = getContentResolver();
+    		Uri deleteUri = Uri.parse("content://sms");
 
-        Uri inbox = Uri.parse( "content://sms/inbox" );
-        Cursor cursor = cr.query(
-            inbox,
-            new String[] { "_id", "thread_id", "body" },
-            null,
-            null,
-            null);
-
-        if (cursor == null)
-          return;
-
-        if (!cursor.moveToFirst())
-          return;
-
-        do {
-          String body = cursor.getString( 2 );
-          if( body.contains( "ContactSwap:" )  && body.contains( "Query:" ) || body.contains( "Response:" ))
-            continue;
-          long thread_id = cursor.getLong( 1 );
-          Uri thread = Uri.parse( "content://sms/conversations/" + thread_id );
-          cr.delete( thread, null, null );
-        } while ( cursor.moveToNext() );
-      }
+    	    getContentResolver().delete(deleteUri, "body=?", new String[] {"ContactSwap:"});
+    	}
     };
 
     private Uri addContact(String contactName, String phoneNumber)
