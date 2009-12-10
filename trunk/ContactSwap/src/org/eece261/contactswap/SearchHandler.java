@@ -20,6 +20,7 @@ public class SearchHandler {
 	
 	private ArrayList<Search> alSearches;
 	private ArrayList<Search> alUnsolicitedContacts;
+	private ArrayList<Search> alReceived;
 	private File dir;
 	
 	public SearchHandler() {
@@ -28,7 +29,42 @@ public class SearchHandler {
 		
 		loadSearchesList();
 		loadUnsolicitedContactsList();
+		loadReceivedList();
 	}
+	
+	private void loadReceivedList() {
+    	FileInputStream fin;
+    	DataInputStream din;
+    	
+    	alReceived = new ArrayList<Search>();
+    	
+    	try {
+    		File f = new File(dir, "receivedList");
+    		f.createNewFile();
+			fin = new FileInputStream(f);
+			din = new DataInputStream(fin);
+			
+			while(din.available() > 0) {
+				Search temp = new Search();
+				temp.name = din.readUTF();
+				String current = din.readUTF();
+				while(!current.equalsIgnoreCase("")) {
+					temp.responses.add(current);
+					current = din.readUTF();
+				}
+				alReceived.add(temp);
+			}
+			
+			din.close();
+			fin.close();
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+    }
+
 	
 	private void loadSearchesList() {
     	FileInputStream fin;
@@ -96,6 +132,86 @@ public class SearchHandler {
 		} 
     }
     
+	public boolean addReceivedResult(String name, String phone) {
+    	boolean NotFound = true;
+    	for(int i = 0; i < alReceived.size(); i++) {
+    		if(alReceived.get(i).name.equalsIgnoreCase(name)) {
+    			alReceived.get(i).responses.add(phone);
+    			NotFound = false;
+    		}
+    	}
+    	if(NotFound) {
+    		return false;
+    	}
+    	
+    	FileOutputStream fout;
+    	DataOutputStream dout;
+    	
+    	try {
+    		File f = new File(dir, "receivedList");
+            f.createNewFile();
+    		fout = new FileOutputStream(f);
+			dout = new DataOutputStream(fout);
+			
+			for(int i = 0; i < alReceived.size(); i++) {
+				dout.writeUTF(alReceived.get(i).name);
+				for(int j = 0; j < alReceived.get(i).responses.size(); j++) {
+					dout.writeUTF(alReceived.get(i).responses.get(j));
+				}
+				dout.writeUTF("");
+			}
+			
+			dout.close();
+			fout.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return true;
+    }
+
+    public void addReceived(String name, String phone) {
+    	boolean NotFound = true;
+    	for(int i = 0; i < alReceived.size(); i++) {
+    		if(alReceived.get(i).name.equalsIgnoreCase(name)) {
+    			alReceived.get(i).responses.add(phone);
+    			NotFound = false;
+    		}
+    	}
+    	if(NotFound) {
+    		Search temp = new Search();
+    		temp.name = name;
+    		temp.responses.add(phone);
+    		alReceived.add(temp);
+    	}
+    	
+    	FileOutputStream fout;
+    	DataOutputStream dout;
+    	
+    	try {
+    		File f = new File(dir, "ReceivedList");
+            f.createNewFile();
+    		fout = new FileOutputStream(f);
+			dout = new DataOutputStream(fout);
+			
+			for(int i = 0; i < alReceived.size(); i++) {
+				dout.writeUTF(alReceived.get(i).name);
+				for(int j = 0; j < alReceived.get(i).responses.size(); j++) {
+					dout.writeUTF(alReceived.get(i).responses.get(j));
+				}
+				dout.writeUTF("");
+			}
+			
+			dout.close();
+			fout.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+	
     public boolean addSearchResult(String name, String phone) {
     	boolean NotFound = true;
     	for(int i = 0; i < alSearches.size(); i++) {
@@ -196,6 +312,26 @@ public class SearchHandler {
     	return alResults;
     }
     
+    public ArrayList<String> getReceivedNames() {
+    	loadSearchesList();
+    	ArrayList<String> alResults = new ArrayList<String>();
+    	for(int i = 0; i < alReceived.size(); i++) {
+    		alResults.add(alReceived.get(i).name);
+    	}
+    	return alResults;
+    }
+
+    public ArrayList<String> getReceivedResults(String name) {
+    	loadSearchesList();
+    	ArrayList<String> alResults = new ArrayList<String>();
+    	for(int i = 0; i < alReceived.size(); i++) {
+    		if(alReceived.get(i).name != null && alReceived.get(i).name.equalsIgnoreCase(name)){
+    			return alReceived.get(i).responses;
+    		}
+    	}
+    	return alResults;
+    }
+    
     public ArrayList<String> getUnsolicitedContactNames() {
     	loadSearchesList();
     	ArrayList<String> alResults = new ArrayList<String>();
@@ -214,6 +350,70 @@ public class SearchHandler {
     		}
     	}
     	return alResults;
+    }
+    
+    public void addReceived(String name) {
+    	Search temp = new Search();
+    	temp.name = name;
+    	alReceived.add(temp);
+    	
+    	FileOutputStream fout;
+    	DataOutputStream dout;
+    	
+    	try {
+    		File f = new File(dir, "receivedList");
+            f.createNewFile();
+    		fout = new FileOutputStream(f);
+			dout = new DataOutputStream(fout);
+			
+			for(int i = 0; i < alReceived.size(); i++) {
+				dout.writeUTF(alReceived.get(i).name);
+				for(int j = 0; j < alReceived.get(i).responses.size(); j++) {
+					dout.writeUTF(alReceived.get(i).responses.get(j));
+				}
+				dout.writeUTF("");
+			}
+			
+			dout.close();
+			fout.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    public void removeReceived(String Name) {
+    	for(int i = 0; i < alReceived.size(); i++) {
+			if(alReceived.get(i).name.equalsIgnoreCase(Name)) {
+				alReceived.remove(i);
+			}
+    	}
+    	
+    	FileOutputStream fout;
+    	DataOutputStream dout;
+    	
+    	try {
+    		File f = new File(dir, "receivedList");
+            f.createNewFile();
+    		fout = new FileOutputStream(f);
+			dout = new DataOutputStream(fout);
+			
+			for(int i = 0; i < alReceived.size(); i++) {
+				dout.writeUTF(alReceived.get(i).name);
+				for(int j = 0; j < alReceived.get(i).responses.size(); j++) {
+					dout.writeUTF(alReceived.get(i).responses.get(j));
+				}
+				dout.writeUTF("");
+			}
+			
+			dout.close();
+			fout.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
     
     public void addSearch(String name) {
