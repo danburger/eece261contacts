@@ -6,9 +6,9 @@
          
     
     <TextView  
-        android:layout_height="wrap_content" android:textColor="#F00" android:layout_gravity="center" android:layout_width="wrap_content" android:typeface="normal" android:textSize="30px" android:text="Send This Contact"/>     
+        android:layout_height="wrap_content" android:textColor="#F00" android:layout_gravity="center" android:layout_width="wrap_content" android:typeface="normal" android:textSize="30px" android:text="Send This Contact" android:id="@+id/bview"/>     
               
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:width="320px" android:gravity="center" android:id="@+id/tvSearchName" android:text="Name" android:textSize="20px" android:paddingBottom="5px" android:paddingTop="5px"></TextView><Button android:layout_height="wrap_content" android:id="@+id/btnReturn" android:layout_width="320px" android:layout_gravity="center" android:text="Return to Contact List"/><ListView android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="#333" android:id="@+id/lvFriends"></ListView>    
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:width="320px" android:gravity="center" android:id="@+id/tvSearchName" android:text="Name" android:textSize="20px" android:paddingBottom="5px" android:paddingTop="5px"></TextView><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:width="320px" android:gravity="center" android:text="Pick a friend to send this contact." android:id="@+id/aview"></TextView><Button android:layout_height="wrap_content" android:id="@+id/btnReturn" android:layout_width="320px" android:layout_gravity="center" android:text="Return to Contact List"/><ListView android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="#333" android:id="@+id/lvFriends"></ListView>    
 
 
 

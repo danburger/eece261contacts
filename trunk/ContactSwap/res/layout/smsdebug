@@ -30,5 +30,11 @@
         android:layout_width="fill_parent" 
         android:layout_height="wrap_content"
         android:text="Send SMS"
+        />
+     <Button 
+        android:id="@+id/btnReturn"  
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"
+        android:text="Return to Main Menu"
         />    
 </LinearLayout>
