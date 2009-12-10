@@ -50,6 +50,7 @@ public class SmsReceiver extends BroadcastReceiver
 
                 	while(msgAsString.length() > 0) {
                 		//Get Tag
+                		Tag = "";
                     	while(msgAsString.charAt(0) != ':') {
                     		Tag += msgAsString.charAt(0);
                     		msgAsString = msgAsString.substring(1);
@@ -63,6 +64,8 @@ public class SmsReceiver extends BroadcastReceiver
                     	} else if(Tag.equalsIgnoreCase("Decline")) {
                     		Decline = true;
                     	} else {
+                    		Data = "";
+
                     		//Get Data
                         	while(msgAsString.charAt(0) != ':') {
                         		Data += msgAsString.charAt(0);
@@ -78,7 +81,6 @@ public class SmsReceiver extends BroadcastReceiver
                         	}
                     	}
                 	}
-                	
                 	
                 	if(Command.equalsIgnoreCase("Query")) {
                 		ContentResolver cr = context.getContentResolver();
