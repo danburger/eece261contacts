@@ -4,11 +4,14 @@ import java.util.ListIterator;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Contacts;
+import android.provider.Contacts.People;
 import android.util.Log; 
 import android.view.View;
 import android.widget.AdapterView;
@@ -16,6 +19,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ListAdapter;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +34,7 @@ public class ContactSwap extends Activity {
     Button btnReturn;
     Button btnSearch;
     Button btnRemove;
+    Button btnSend;
     
     String curname = "";
     
@@ -37,7 +43,10 @@ public class ContactSwap extends Activity {
     EditText etName;
     
     TextView tvSearchName;
+    TextView aview;
     
+    ListView lvSend;
+    ListView lvContacts;
     ListView lvFriends;
     ListView lvSearches;
     ListView lvResults;
@@ -62,6 +71,7 @@ public class ContactSwap extends Activity {
         btnFriends = (Button) findViewById(R.id.btnFriends);
         btnQuit = (Button) findViewById(R.id.btnQuit);
         btnSearch = (Button) findViewById(R.id.btnSearch);
+        btnSend = (Button) findViewById(R.id.btnSend);
  
         btnSearch.setOnClickListener(new View.OnClickListener() 
         {
@@ -79,6 +89,15 @@ public class ContactSwap extends Activity {
             }
         });
         
+        btnSend.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                startSendContact();
+            }
+        });
+
+        
         btnFriends.setOnClickListener(new View.OnClickListener() 
         {
             public void onClick(View v) 
@@ -94,6 +113,94 @@ public class ContactSwap extends Activity {
                 finish();
             }
         });    	
+    }
+    
+    private void startSendContact()
+    {
+    	setContentView(R.layout.sendcontacts);
+    	
+    	ContentResolver cr = getContentResolver();
+		Cursor cur =  cr.query(People.CONTENT_URI,null,null,null,null);
+    	
+    	 final int[] names = new int[] {android.R.id.text1, android.R.id.text2};
+    	 lvContacts = (ListView) findViewById(R.id.lvContacts);
+
+    	 final ListAdapter adapter = new SimpleCursorAdapter(
+                this, // Context.
+                android.R.layout.two_line_list_item,  
+                cur,                                    // Pass in the cursor to bind to.
+                new String[] {People.NAME, People.NUMBER_KEY}, // Array of cursor columns to bind to.
+                names);                                 // Parallel array of which template objects to bind to those columns.
+
+    	lvContacts.setAdapter(adapter);
+    	
+        btnReturn = (Button) findViewById(R.id.btnReturn);
+        
+        btnReturn.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                startMainMenu();
+            }
+        });
+        
+        lvContacts.setOnItemClickListener(new AdapterView.OnItemClickListener() 
+        {
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,long arg3) 
+			{
+				Cursor c = (Cursor)adapter.getItem(arg2);
+				String name_ = c.getString(c.getColumnIndex(People.NAME));
+				String number_ = c.getString(c.getColumnIndex(People.NUMBER));
+				sendThisContactScreen(name_, number_);
+			}
+        });
+    }
+    
+    private void sendThisContactScreen(final String name, final String number) {
+    	setContentView(R.layout.sendthiscontact);
+    	
+    	btnReturn = (Button) findViewById(R.id.btnReturn);
+    	lvFriends = (ListView) findViewById(R.id.lvFriends);
+    	
+    	TextView displayName = (TextView) findViewById(R.id.tvSearchName);
+    	displayName.setText(name + ": "+ number);
+    	
+    	    	
+    	final ArrayAdapter<String> aaFriends = new ArrayAdapter<String>(this, 
+        		android.R.layout.simple_list_item_1, fhFriends.getFriends());
+        
+    	lvFriends.setAdapter(aaFriends);
+    	
+    	btnReturn.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                startSendContact();
+            }
+        });
+    	
+    	lvFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,long arg3) 
+			{
+				final String friendNm = fhFriends.getFriends().get(arg2);
+				
+				new AlertDialog.Builder(ContactSwap.this).setTitle("Are you sure?")
+				.setMessage("Are you sure you want to send " + name + "'s number to " + friendNm + "?")
+				.setNeutralButton("No",	new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {}
+				})
+				.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						String message = "ContactSwap:Contact:Name:" + name + ":Phone:" + number + ":";
+						ContactSwapUtils.sendSMS(friendNm, message);
+						startSendContact();
+					}
+				})
+				.show();
+			}
+		});
     }
     
     private void startSearchManager() {
