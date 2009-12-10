@@ -111,8 +111,8 @@ public class SmsReceiver extends BroadcastReceiver
                 	} else if(Command.equalsIgnoreCase("Contact")) {
                 		if(!NotFound) {
 	                		SearchHandler shSearches = new SearchHandler();
-	                		if(!shSearches.addSearchResult(Name, Phone)) {
-	                			shSearches.addUnsolicitedContact(Name, Phone);
+	                		if(!shSearches.addReceivedResult(Name, Phone)) {
+	                			shSearches.addReceived(Name, Phone);
 	                		}
                 		}
                 	} else if(Command.equalsIgnoreCase("Friend")) {
