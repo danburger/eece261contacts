@@ -11,6 +11,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+      		android:name=".PopUp"
+      		android:theme="@android:style/Theme.Dialog"
+      		android:launchMode="singleTask"
+      		android:configChanges="keyboardHidden|orientation"
+      		android:screenOrientation="user"
+      		android:taskAffinity="org.eece261.contactswap">
+    	</activity>
         
         <receiver android:name=".SmsReceiver"> 
             <intent-filter> 
