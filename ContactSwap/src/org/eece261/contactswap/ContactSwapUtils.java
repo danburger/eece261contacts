@@ -1,14 +1,6 @@
 package org.eece261.contactswap;
 
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.DatabaseUtils;
-import android.net.Uri;
 import android.telephony.SmsManager;
-import android.util.Log;
 
 public class ContactSwapUtils {
 	public static void sendSMS(String phoneNumber, String message)
