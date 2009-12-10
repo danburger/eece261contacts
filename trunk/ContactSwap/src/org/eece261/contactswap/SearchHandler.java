@@ -209,7 +209,7 @@ public class SearchHandler {
     	loadSearchesList();
     	ArrayList<String> alResults = new ArrayList<String>();
     	for(int i = 0; i < alUnsolicitedContacts.size(); i++) {
-    		if(alSearches.get(i).name.equalsIgnoreCase(name)){
+    		if(alUnsolicitedContacts.get(i).name != null && alUnsolicitedContacts.get(i).name.equalsIgnoreCase(name)){
     			return alUnsolicitedContacts.get(i).responses;
     		}
     	}
