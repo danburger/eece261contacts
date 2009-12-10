@@ -1,5 +1,7 @@
 package org.eece261.contactswap;
 
+import org.eece261.contactswap.PopUp;
+
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -18,7 +20,7 @@ public class SmsReceiver extends BroadcastReceiver
         //---get the SMS message passed in---
         Bundle bundle = intent.getExtras();        
         SmsMessage[] msgs = null;
-        String str = "";            
+
         if (bundle != null)
         {
             //---retrieve the SMS message received---
@@ -31,60 +33,100 @@ public class SmsReceiver extends BroadcastReceiver
                 
                 //Is this one of ours?
                 if(msgAsString.startsWith("ContactSwap:")) {
-                	//TODO rewrite parsing stuff
-                }
-                if(msgs[i].getMessageBody().toString().contains("ContactSwap:Contact:") && ! msgs[i].getMessageBody().toString().contains("NotFound:")) {
-                	str += "Contact Found!";
-                	String Phone = "";
+                	msgAsString = msgAsString.substring(12);
+                	String Command = "";
+                	String Tag = "";
+                	String Data = "";
                 	String Name = "";
-                	int position = msgs[i].getMessageBody().toString().indexOf("Phone:") + 6;
-                	while(msgs[i].getMessageBody().toString().charAt(position) != ':') {
-                		Phone += msgs[i].getMessageBody().toString().charAt(position);
-                		position++;
+            		String Phone = "";
+            		boolean NotFound = false;
+            		boolean Accept = false;
+            		boolean Decline = false;
+                	
+                	//Get command
+                	while(msgAsString.charAt(0) != ':') {
+                		Command += msgAsString.charAt(0);
+                		msgAsString = msgAsString.substring(1);
                 	}
-                	position = msgs[i].getMessageBody().toString().indexOf("Name:") + 5;
-                	while(msgs[i].getMessageBody().toString().charAt(position) != ':') {
-                		Name += msgs[i].getMessageBody().toString().charAt(position);
-                		position++;
-                	}
-                	SearchHandler shSearches = new SearchHandler();
-                	shSearches.addSearchResult(Name, Phone);
-                } else if (msgs[i].getMessageBody().toString().contains("ContactSwap:Query:") ) {
-                	str += "Query Received!";
-                	String Name = "";
-                	String Phone = "";
-                	int position = msgs[i].getMessageBody().toString().indexOf("Name:") + 5;
-                	while(msgs[i].getMessageBody().toString().charAt(position) != ':') {
-                		Name += msgs[i].getMessageBody().toString().charAt(position);
-                		position++;
+                	msgAsString = msgAsString.substring(1);
+
+                	while(msgAsString.length() > 0) {
+                		//Get Tag
+                    	while(msgAsString.charAt(0) != ':') {
+                    		Tag += msgAsString.charAt(0);
+                    		msgAsString = msgAsString.substring(1);
+                    	}
+                    	msgAsString = msgAsString.substring(1);
+                    	
+                    	if(Tag.equalsIgnoreCase("NotFound")) {
+                    		NotFound = true;
+                    	} else if(Tag.equalsIgnoreCase("Accept")) {
+                    		Accept = true;
+                    	} else if(Tag.equalsIgnoreCase("Decline")) {
+                    		Decline = true;
+                    	} else {
+                    		//Get Data
+                        	while(msgAsString.charAt(0) != ':') {
+                        		Data += msgAsString.charAt(0);
+                        		msgAsString = msgAsString.substring(1);
+                        	}
+                        	msgAsString = msgAsString.substring(1);
+                        	Data.replace('^', ' ');
+                        	
+                        	if(Tag.equalsIgnoreCase("Name")) {
+                        		Name = Data;
+                        	} else if(Tag.equalsIgnoreCase("Phone")) {
+                        		Phone = Data;
+                        	}
+                    	}
                 	}
                 	
-                	Name.replace('^', ' ');
                 	
-                	ContentResolver cr = context.getContentResolver();
-					
-					Cursor cur =  cr.query(People.CONTENT_URI,null,null,null,null);
-					
-					if (cur.moveToFirst()) {
-				        int nameColumn = cur.getColumnIndex(People.NAME); 
-				        int phoneColumn = cur.getColumnIndex(People.NUMBER);
-				    
-				        do {
-				            if(cur.getString(nameColumn).equalsIgnoreCase(Name)) {
-				            	Phone = cur.getString(phoneColumn);
-				            }
-				        } while (cur.moveToNext());
-				    }
-					
-					String message = "";
-					if(!Phone.equalsIgnoreCase("")) {
-						message = "ContactSwap:Contact:Name:" + Name + ":Phone:" + Phone + ":";
-					} else {
-						message = "ContactSwap:Contact:Name:" + Name + ":NotFound:";
-					}
-						
-                	ContactSwapUtils.sendSMS(msgs[i].getOriginatingAddress(), message);
-                	
+                	if(Command.equalsIgnoreCase("Query")) {
+                		ContentResolver cr = context.getContentResolver();
+    					Cursor cur =  cr.query(People.CONTENT_URI,null,null,null,null);
+    					
+    					if (cur.moveToFirst()) {
+    				        int nameColumn = cur.getColumnIndex(People.NAME); 
+    				        int phoneColumn = cur.getColumnIndex(People.NUMBER);
+    				    
+    				        do {
+    				            if(cur.getString(nameColumn).equalsIgnoreCase(Name)) {
+    				            	Phone = cur.getString(phoneColumn);
+    				            }
+    				        } while (cur.moveToNext());
+    				    }
+    					
+    					Name.replace(' ', '^');
+    					
+    					String message = "";
+    					if(!Phone.equalsIgnoreCase("")) {
+    						message = "ContactSwap:Contact:Name:" + Name + ":Phone:" + Phone + ":";
+    					} else {
+    						message = "ContactSwap:Contact:Name:" + Name + ":NotFound:";
+    					}
+    						
+                    	ContactSwapUtils.sendSMS(msgs[i].getOriginatingAddress(), message);
+                    	
+                	} else if(Command.equalsIgnoreCase("Contact")) {
+                		if(!NotFound) {
+	                		SearchHandler shSearches = new SearchHandler();
+	                		if(!shSearches.addSearchResult(Name, Phone)) {
+	                			shSearches.addUnsolicitedContact(Name, Phone);
+	                		}
+                		}
+                	} else if(Command.equalsIgnoreCase("Friend")) {
+                		final FriendHandler fhFriends = new FriendHandler();
+                		if(Decline) {
+                			//
+                		} else if(Accept) {
+                			fhFriends.addFriend(msgs[i].getOriginatingAddress());
+                		} else {
+                			context.startActivity(new Intent()
+                										.setClass(context, PopUp.class)
+                										.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                		}
+                	}
                 }
             }
         }                         
