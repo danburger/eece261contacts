@@ -34,6 +34,7 @@ public class ContactSwap extends Activity {
     Button btnReturn;
     Button btnSearch;
     Button btnRemove;
+    Button btnUnsolicited;
     Button btnSend;
     
     String curname = "";
@@ -49,6 +50,7 @@ public class ContactSwap extends Activity {
     ListView lvContacts;
     ListView lvFriends;
     ListView lvSearches;
+    ListView lvUnsolicited;
     ListView lvResults;
     SearchHandler shSearches;
     FriendHandler fhFriends;
@@ -72,12 +74,22 @@ public class ContactSwap extends Activity {
         btnQuit = (Button) findViewById(R.id.btnQuit);
         btnSearch = (Button) findViewById(R.id.btnSearch);
         btnSend = (Button) findViewById(R.id.btnSend);
+        btnUnsolicited = (Button) findViewById(R.id.btnUnsolicited); 
+        
  
         btnSearch.setOnClickListener(new View.OnClickListener() 
         {
             public void onClick(View v) 
             {                
                 startSearchManager();
+            }
+        });
+        
+        btnUnsolicited.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                startUnsolicitedManager();
             }
         });
         
@@ -199,6 +211,91 @@ public class ContactSwap extends Activity {
 					}
 				})
 				.show();
+			}
+		});
+    }
+    
+    private void startUnsolicitedManager() {
+    	setContentView(R.layout.unsolicitedcontacts);
+    	
+    	btnReturn = (Button) findViewById(R.id.btnReturn);
+    	lvUnsolicited = (ListView) findViewById(R.id.lvUnsolicited);
+    	    	
+    	final ArrayAdapter<String> aaNames = new ArrayAdapter<String>(this, 
+        		android.R.layout.simple_list_item_1, shSearches.getUnsolicitedContactNames());
+    	
+    	lvUnsolicited.setAdapter(aaNames);
+    	
+    	btnReturn.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                startMainMenu();
+            }
+        });
+    	
+    	lvUnsolicited.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				openUnsolicitedResults(shSearches.getUnsolicitedContactNames().get(arg2));
+			}
+		});
+
+    	
+    }
+    
+    private void openUnsolicitedResults(String name) {
+    	setContentView(R.layout.unsolicitedresults);
+    	
+    	curname = name;
+    	
+    	btnReturn = (Button) findViewById(R.id.btnReturn);
+    	btnRemove = (Button) findViewById(R.id.btnRemove);
+    	lvResults = (ListView) findViewById(R.id.lvResults);
+    	tvSearchName = (TextView) findViewById(R.id.tvSearchName);
+    	
+    	tvSearchName.setText(name + "'s Results");
+    	
+    	final ArrayAdapter<String> aaResults = new ArrayAdapter<String>(this, 
+        		android.R.layout.simple_list_item_1, shSearches.getUnsolicitedContactNumbers(name));
+        
+    	lvResults.setAdapter(aaResults);
+    	
+    	btnReturn.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+                startUnsolicitedManager();
+            }
+        });
+    	
+    	btnRemove.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View v) 
+            {                
+            	shSearches.removeUnsolicitedContact(curname);
+                startUnsolicitedManager();
+            }
+        });
+    	
+    	lvResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			//System.err.println("Could not listen on port: 8080.");
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,long arg3) {
+				
+				final String ThisWillOnlyBeUsedHERE = shSearches.getUnsolicitedContactNumbers(curname).get(arg2);	
+				new AlertDialog.Builder(ContactSwap.this).setTitle("Are you sure?")
+					.setMessage("Are you sure you want to add " + curname + " with number " + ThisWillOnlyBeUsedHERE + "?")
+					.setNeutralButton("No",	new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {}
+					})
+					.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							addContact(curname, ThisWillOnlyBeUsedHERE);
+							startUnsolicitedManager();
+						}
+					})
+					.show();
 			}
 		});
     }
