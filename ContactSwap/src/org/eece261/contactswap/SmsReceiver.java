@@ -1,7 +1,5 @@
 package org.eece261.contactswap;
 
-import org.eece261.contactswap.PopUp;
-
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -121,11 +119,7 @@ public class SmsReceiver extends BroadcastReceiver
                 			//
                 		} else if(Accept) {
                 			fhFriends.addFriend(msgs[i].getOriginatingAddress());
-                		} else {
-                			context.startActivity(new Intent()
-                										.setClass(context, PopUp.class)
-                										.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                		}
+                		} else {}
                 	}
                 }
             }
