@@ -1,11 +1,5 @@
 package org.eece261.contactswap;
 
-
-import java.util.ArrayList;
-
-import org.eece261.contactswap.ContactSwap.search;
-import org.eece261.contactswap.ContactSwap;
-
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -13,12 +7,10 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.Contacts.People;
-import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 
 public class SmsReceiver extends BroadcastReceiver
 {		
-	ArrayList<search> alSearches;
 	
     @Override
     public void onReceive(Context context, Intent intent) 
@@ -35,7 +27,13 @@ public class SmsReceiver extends BroadcastReceiver
             for (int i=0; i<msgs.length; i++){
                 msgs[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
                 
-                if(msgs[i].getMessageBody().toString().contains("ContactSwap:Response:") && ! msgs[i].getMessageBody().toString().contains("NotFound:")) {
+                String msgAsString = msgs[i].getMessageBody().toString();
+                
+                //Is this one of ours?
+                if(msgAsString.startsWith("ContactSwap:")) {
+                	//TODO rewrite parsing stuff
+                }
+                if(msgs[i].getMessageBody().toString().contains("ContactSwap:Contact:") && ! msgs[i].getMessageBody().toString().contains("NotFound:")) {
                 	str += "Contact Found!";
                 	String Phone = "";
                 	String Name = "";
@@ -49,7 +47,8 @@ public class SmsReceiver extends BroadcastReceiver
                 		Name += msgs[i].getMessageBody().toString().charAt(position);
                 		position++;
                 	}
-                	context.startActivity(new Intent(context, ContactSwap.class).putExtra("Name", Name).putExtra("Phone",Phone).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                	SearchHandler shSearches = new SearchHandler();
+                	shSearches.addSearchResult(Name, Phone);
                 } else if (msgs[i].getMessageBody().toString().contains("ContactSwap:Query:") ) {
                 	str += "Query Received!";
                 	String Name = "";
@@ -79,34 +78,15 @@ public class SmsReceiver extends BroadcastReceiver
 					
 					String message = "";
 					if(!Phone.equalsIgnoreCase("")) {
-						message = "ContactSwap:Response:Name:" + Name + ":Phone:" + Phone + ":";
+						message = "ContactSwap:Contact:Name:" + Name + ":Phone:" + Phone + ":";
 					} else {
-						message = "ContactSwap:Response:Name:" + Name + ":NotFound:";
+						message = "ContactSwap:Contact:Name:" + Name + ":NotFound:";
 					}
 						
-                	sendSMS(msgs[i].getOriginatingAddress(), message);
+                	ContactSwapUtils.sendSMS(msgs[i].getOriginatingAddress(), message);
                 	
                 }
             }
-        }
-        /*	for (SmsMessage currentMessage : msgs) {
-		currentMessage.getDisplayMessageBody();
-		Uri deleteUri = Uri.parse("content://sms");
-		currentMessage.getTimestampMillis();
-		context.getContentResolver().delete(
-				deleteUri,
-				"address=? and date=?",
-				new String[] {
-						currentMessage.getOriginatingAddress(),
-						String.valueOf(currentMessage
-								.getTimestampMillis()) });
-	}*/
-
-    }
-    
-    private void sendSMS(String phoneNumber, String message)
-    {        
-    	SmsManager sms = SmsManager.getDefault();
-        sms.sendTextMessage(phoneNumber, null, message, null, null);        
+        }                         
     }
 }
