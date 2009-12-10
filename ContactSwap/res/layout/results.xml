@@ -6,9 +6,9 @@
          
     
     <TextView  
-        android:layout_height="wrap_content" android:textColor="#F00" android:layout_gravity="center" android:layout_width="wrap_content" android:typeface="normal" android:textSize="30px" android:text="Search Results"/>     
+        android:layout_height="wrap_content" android:textColor="#F00" android:layout_gravity="center" android:layout_width="wrap_content" android:typeface="normal" android:textSize="30px" android:text="Phone Numbers for" android:id="@+id/tvSearchName"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:width="320px" android:gravity="center" android:id="@+id/aview" android:text="Click an existing number to save this contact."></TextView>     
               
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:width="320px" android:gravity="center" android:id="@+id/tvSearchName" android:text="Name" android:textSize="30px"></TextView><Button android:layout_height="wrap_content" android:layout_width="320px" android:layout_gravity="center" android:id="@+id/btnRemove" android:text="Remove Search"/><Button android:layout_height="wrap_content" android:id="@+id/btnReturn" android:layout_width="320px" android:layout_gravity="center" android:text="Return to Searches"/><ListView android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="#333" android:id="@+id/lvResults"></ListView>    
+    <Button android:layout_height="wrap_content" android:layout_width="320px" android:layout_gravity="center" android:id="@+id/btnRemove" android:text="Remove Stored Contact"/>		TextView aview = (TextView) findViewById(R.id.aview);<Button android:layout_height="wrap_content" android:id="@+id/btnReturn" android:layout_width="320px" android:layout_gravity="center" android:text="Return to Searches"/><ListView android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="#333" android:id="@+id/lvResults"></ListView>    
 
 
 
