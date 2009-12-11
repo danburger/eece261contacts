@@ -52,14 +52,15 @@ public class ContactSwap extends Activity {
 	ListView lvSearches;
 	ListView lvReceivedContacts;
 	ListView lvResults;
-	SearchHandler shSearches;
+	ContactHandler chContacts; // Note: Only handles contacts internal to the
+								// software
 	FriendHandler fhFriends;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		shSearches = new SearchHandler();
+		chContacts = new ContactHandler();
 		fhFriends = new FriendHandler();
 		startMainMenu();
 	}
@@ -122,14 +123,14 @@ public class ContactSwap extends Activity {
 
 		final ListAdapter adapter = new SimpleCursorAdapter(this, // Context.
 				android.R.layout.two_line_list_item, cur, // Pass in the cursor
-															// to bind to.
+				// to bind to.
 				new String[] { People.NAME, People.NUMBER_KEY }, // Array of
-																	// cursor
-																	// columns
-																	// to bind
-																	// to.
+				// cursor
+				// columns
+				// to bind
+				// to.
 				names); // Parallel array of which template objects to bind to
-						// those columns.
+		// those columns.
 
 		lvContacts.setAdapter(adapter);
 
@@ -163,12 +164,12 @@ public class ContactSwap extends Activity {
 
 		TextView title = (TextView) findViewById(R.id.bview);
 		title.setText("Send " + name + ":");
-		
+
 		TextView displayName = (TextView) findViewById(R.id.tvSearchName);
 		displayName.setText(number);
-		
+
 		TextView aview = (TextView) findViewById(R.id.aview);
-		aview.setText("Click a friend to send " + name +"'s number.");
+		aview.setText("Click a friend to send " + name + "'s number.");
 
 		final ArrayAdapter<String> aaFriends = new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, fhFriends.getFriends());
@@ -222,8 +223,7 @@ public class ContactSwap extends Activity {
 		lvReceivedContacts = (ListView) findViewById(R.id.lvReceivedContacts);
 
 		final ArrayAdapter<String> aaNames = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_1, shSearches
-						.getReceivedNames());
+				android.R.layout.simple_list_item_1, chContacts.getReceivedContacts());
 
 		lvReceivedContacts.setAdapter(aaNames);
 
@@ -238,8 +238,8 @@ public class ContactSwap extends Activity {
 					@Override
 					public void onItemClick(AdapterView<?> arg0, View arg1,
 							int arg2, long arg3) {
-						openReceivedResultsMain(shSearches.getReceivedNames()
-								.get(arg2));
+						openReceivedResultsMain(chContacts.getReceivedContacts().get(
+								arg2));
 					}
 				});
 
@@ -256,11 +256,11 @@ public class ContactSwap extends Activity {
 		tvSearchName = (TextView) findViewById(R.id.tvSearchName);
 
 		tvSearchName.setText(name);
-		
+
 		btnReturn.setText("Return to Contacts Received");
-		
+
 		final ArrayAdapter<String> aaResults = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_1, shSearches
+				android.R.layout.simple_list_item_1, chContacts
 						.getReceivedResults(name));
 
 		lvResults.setAdapter(aaResults);
@@ -273,7 +273,7 @@ public class ContactSwap extends Activity {
 
 		btnRemove.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				shSearches.removeReceived(curname);
+				chContacts.removeContact(curname);
 				startReceivedContactsManager();
 			}
 		});
@@ -283,7 +283,7 @@ public class ContactSwap extends Activity {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
 
-				final String ThisWillOnlyBeUsedHERE = shSearches
+				final String ThisWillOnlyBeUsedHERE = chContacts
 						.getReceivedResults(curname).get(arg2);
 				new AlertDialog.Builder(ContactSwap.this).setTitle(
 						"Are you sure?").setMessage(
@@ -315,8 +315,7 @@ public class ContactSwap extends Activity {
 		etName = (EditText) findViewById(R.id.etName);
 
 		final ArrayAdapter<String> aaNames = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_1, shSearches
-						.getReceivedNames());
+				android.R.layout.simple_list_item_1, chContacts.getSearchNames());
 
 		lvSearches.setAdapter(aaNames);
 
@@ -328,7 +327,7 @@ public class ContactSwap extends Activity {
 
 		btnSearch.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				shSearches.addReceived(etName.getText().toString());
+				chContacts.addSearch(etName.getText().toString());
 				queryContactsForName(etName.getText().toString());
 				aaNames.notifyDataSetChanged();
 				openSearchResults(etName.getText().toString());
@@ -341,7 +340,7 @@ public class ContactSwap extends Activity {
 					@Override
 					public void onItemClick(AdapterView<?> arg0, View arg1,
 							int arg2, long arg3) {
-						openSearchResults(shSearches.getReceivedNames().get(arg2));
+						openSearchResults(chContacts.getSearchNames().get(arg2));
 					}
 				});
 	}
@@ -356,10 +355,10 @@ public class ContactSwap extends Activity {
 		lvResults = (ListView) findViewById(R.id.lvResults);
 		tvSearchName = (TextView) findViewById(R.id.tvSearchName);
 
-		tvSearchName.setText(name + "'s Phone Numbers");
+		tvSearchName.setText(name);
 
 		final ArrayAdapter<String> aaResults = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_1, shSearches
+				android.R.layout.simple_list_item_1, chContacts
 						.getReceivedResults(name));
 
 		lvResults.setAdapter(aaResults);
@@ -372,7 +371,7 @@ public class ContactSwap extends Activity {
 
 		btnRemove.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				shSearches.removeReceived(curname);
+				chContacts.removeContact(curname);
 				startSearchManager();
 			}
 		});
@@ -382,8 +381,8 @@ public class ContactSwap extends Activity {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
 
-				final String ThisWillOnlyBeUsedHERE = shSearches
-						.getSearchResults(curname).get(arg2);
+				final String ThisWillOnlyBeUsedHERE = chContacts
+						.getReceivedResults(curname).get(arg2);
 				new AlertDialog.Builder(ContactSwap.this).setTitle(
 						"Are you sure?").setMessage(
 						"Are you sure you want to add " + curname
@@ -425,8 +424,9 @@ public class ContactSwap extends Activity {
 
 		btnAdd.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				fhFriends.addFriend(etName.getText().toString());
-				aaFriends.notifyDataSetChanged();
+				fhFriends.addRequest(etName.getText().toString());
+				ContactSwapUtils.sendSMS(etName.getText().toString(), "ContactSwap:Friend:");
+				Toast.makeText(getApplicationContext(), "Friend request sent.", Toast.LENGTH_LONG);
 			}
 		});
 
@@ -461,7 +461,7 @@ public class ContactSwap extends Activity {
 							Toast.LENGTH_SHORT).show();
 			}
 		});
-		
+
 		btnReturn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				startMainMenu();
@@ -472,7 +472,7 @@ public class ContactSwap extends Activity {
 
 	// Sends and SMS query to all "Friends"
 	private void queryContactsForName(String name) {
-		name.replace(' ', '^');
+		name = name.replace(' ', '^');
 
 		String message = "ContactSwap:Query:Name:" + name + ":";
 		ListIterator<String> alFriendsIterator = fhFriends.getFriends()
