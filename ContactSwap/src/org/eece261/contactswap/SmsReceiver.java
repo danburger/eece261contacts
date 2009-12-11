@@ -1,5 +1,7 @@
 package org.eece261.contactswap;
 
+import org.eece261.contactswap.PopUp;
+
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -72,7 +74,7 @@ public class SmsReceiver extends BroadcastReceiver
                         		msgAsString = msgAsString.substring(1);
                         	}
                         	msgAsString = msgAsString.substring(1);
-                        	Data.replace('^', ' ');
+                        	Data = Data.replace('^', ' ');
                         	
                         	if(Tag.equalsIgnoreCase("Name")) {
                         		Name = Data;
@@ -97,7 +99,7 @@ public class SmsReceiver extends BroadcastReceiver
     				        } while (cur.moveToNext());
     				    }
     					
-    					Name.replace(' ', '^');
+    					Name = Name.replace(' ', '^');
     					
     					String message = "";
     					if(!Phone.equalsIgnoreCase("")) {
@@ -110,10 +112,8 @@ public class SmsReceiver extends BroadcastReceiver
                     	
                 	} else if(Command.equalsIgnoreCase("Contact")) {
                 		if(!NotFound) {
-	                		SearchHandler shSearches = new SearchHandler();
-	                		if(!shSearches.addReceivedResult(Name, Phone)) {
-	                			shSearches.addReceived(Name, Phone);
-	                		}
+	                		ContactHandler shSearches = new ContactHandler();
+	                		shSearches.addReceived(Name, Phone);
                 		}
                 	} else if(Command.equalsIgnoreCase("Friend")) {
                 		final FriendHandler fhFriends = new FriendHandler();
@@ -121,7 +121,12 @@ public class SmsReceiver extends BroadcastReceiver
                 			//
                 		} else if(Accept) {
                 			fhFriends.addFriend(msgs[i].getOriginatingAddress());
-                		} else {}
+                		} else {
+                			context.startActivity(new Intent()
+                										.setClass(context, PopUp.class)
+                										.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                										.putExtra("Phone", msgs[i].getOriginatingAddress()));
+                		}
                 	}
                 }
             }
