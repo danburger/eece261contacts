@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.Contacts.People;
 import android.telephony.SmsMessage;
+import android.util.Log;
 
 public class SmsReceiver extends BroadcastReceiver
 {		
@@ -91,7 +92,7 @@ public class SmsReceiver extends BroadcastReceiver
     					if (cur.moveToFirst()) {
     				        int nameColumn = cur.getColumnIndex(People.NAME); 
     				        int phoneColumn = cur.getColumnIndex(People.NUMBER);
-    				    
+    				            				    
     				        do {
     				            if(cur.getString(nameColumn).equalsIgnoreCase(Name)) {
     				            	Phone = cur.getString(phoneColumn);
@@ -114,7 +115,7 @@ public class SmsReceiver extends BroadcastReceiver
                 		if(!NotFound) {
 	                		ContactHandler shSearches = new ContactHandler();
 	                		shSearches.addReceived(Name, Phone);
-                		}
+	                	}
                 	} else if(Command.equalsIgnoreCase("Friend")) {
                 		final FriendHandler fhFriends = new FriendHandler();
                 		if(Decline) {
