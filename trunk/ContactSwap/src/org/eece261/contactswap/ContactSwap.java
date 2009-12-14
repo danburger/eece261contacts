@@ -124,7 +124,7 @@ public class ContactSwap extends Activity {
 		final ListAdapter adapter = new SimpleCursorAdapter(this, // Context.
 				android.R.layout.two_line_list_item, cur, // Pass in the cursor
 				// to bind to.
-				new String[] { People.NAME, People.NUMBER_KEY }, // Array of
+				new String[] { People.NAME, People.NUMBER }, // Array of
 				// cursor
 				// columns
 				// to bind
