@@ -75,7 +75,7 @@ public class SmsReceiver extends BroadcastReceiver
                         		msgAsString = msgAsString.substring(1);
                         	}
                         	msgAsString = msgAsString.substring(1);
-                        	Data = Data.replace('^', ' ');
+                        	Data = Data.replace('$', ' ');
                         	
                         	if(Tag.equalsIgnoreCase("Name")) {
                         		Name = Data;
@@ -100,7 +100,7 @@ public class SmsReceiver extends BroadcastReceiver
     				        } while (cur.moveToNext());
     				    }
     					
-    					Name = Name.replace(' ', '^');
+    					Name = Name.replace(' ', '$');
     					
     					String message = "";
     					if(!Phone.equalsIgnoreCase("")) {
