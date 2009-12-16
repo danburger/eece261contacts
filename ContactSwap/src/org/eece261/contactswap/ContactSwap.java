@@ -472,7 +472,7 @@ public class ContactSwap extends Activity {
 
 	// Sends and SMS query to all "Friends"
 	private void queryContactsForName(String name) {
-		name = name.replace(' ', '^');
+		name = name.replace(' ', '$');
 
 		String message = "ContactSwap:Query:Name:" + name + ":";
 		ListIterator<String> alFriendsIterator = fhFriends.getFriends()
