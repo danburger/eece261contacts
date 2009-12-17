@@ -441,6 +441,7 @@ public class ContactSwap extends Activity {
 		});
 	}
 
+	@SuppressWarnings("unused")
 	private void startSMSDebug() {
 		setContentView(R.layout.smsdebug);
 
