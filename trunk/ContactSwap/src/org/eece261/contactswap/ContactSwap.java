@@ -441,8 +441,7 @@ public class ContactSwap extends Activity {
 		});
 	}
 
-	@SuppressWarnings("unused")
-	private void startSMSDebug() {
+		private void startSMSDebug() {
 		setContentView(R.layout.smsdebug);
 
 		btnSendSMS = (Button) findViewById(R.id.btnSendSMS);
