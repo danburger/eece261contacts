@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.Contacts.People;
 import android.telephony.SmsMessage;
-import android.util.Log;
 
 public class SmsReceiver extends BroadcastReceiver
 {		
